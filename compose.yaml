@@ -1,0 +1,22 @@
+ngrok-webapi:
+  build: .
+  dockerfile: Dockerfile-ngrok-webapi
+  restart: always
+  volumes:
+    - ./ngrok-webapi:/code
+    - ./ngrok-bin:/release
+  net: host
+
+ngrok-webui:
+  restart: always
+  image: nginx
+  volumes:
+    - ./ngrok.template:/etc/nginx/conf.d/ngrok.template
+    - ./ngrok-webui:/usr/share/nginx/html
+  net: host
+  environment:
+    - NGINX_PORT=8080
+    - NGINX_HOST=localhost
+    - NGROK_WEBAPI_HOST=127.0.0.1
+    - NGROK_WEBAPI_PORT=5000
+  command: /bin/sh -c "envsubst < /etc/nginx/conf.d/ngrok.template > /etc/nginx/conf.d/default.conf &&nginx -g 'daemon off;'"

@@ -1,0 +1,8 @@
+FROM python:3-alpine
+MAINTAINER keepwn <keepwn@gmail.com>
+
+COPY ./ngrok-webapi/requirements.txt /tmp/requirements.txt
+RUN pip3 install -r /tmp/requirements.txt
+
+WORKDIR /code
+CMD ["gunicorn", "-b", ":5000", "view:app"]
