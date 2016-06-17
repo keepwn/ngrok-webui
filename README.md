@@ -18,7 +18,7 @@ simple webui for ngrok
 
 ## Run
 ```bash
-git clone git@github.com:keepwn/ngrok-webui.git my-ngrok
+git clone --recursive https://github.com/keepwn/ngrok-webui.git my-ngrok
 cd my-ngrok
 ./run.sh
 ```
