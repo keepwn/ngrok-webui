@@ -1,5 +1,5 @@
 ngrok-webapi:
-  build: .
+  build: ./ngrok-webapi
   dockerfile: Dockerfile-ngrok-webapi
   restart: always
   volumes:
