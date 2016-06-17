@@ -66,6 +66,8 @@ function _check_requirement_images_()
 {
     # pull docker's images
     echo "will download images, it will take some time depending on your speed" | _color_ yellow
+    echo "->pull docker image: alpine"
+    docker pull alpine
     echo "->pull docker image: keepwn/ngrok-self-hosting"
     docker pull keepwn/ngrok-self-hosting
     echo "->pull docker image: python:3-alpine"
@@ -74,9 +76,9 @@ function _check_requirement_images_()
     docker pull nginx
 }
 
-function _update_ngrokwrapper_setting_()
+function _update_ngrokwebapi_setting_()
 {
-    # update ngrok-wrapper's app.conf
+    # update ngrok-webapi's app.conf
     echo '->update app.conf in ngrok-webapi'
     sed -i "s#^docker_url=.*#docker_url=$DOCKER_URL#" ngrok-webapi/app.conf
     sed -i "s#^server_addr=.*#server_addr=$DOMIAN:$TUNNEL_PORT#" ngrok-webapi/app.conf
@@ -171,7 +173,7 @@ fi
 
 
 echo '3. Creating Ngrok-WebAPI And Ngrok-WebUI' | _color_ blue invert
-_update_ngrokwrapper_setting_
+_update_ngrokwebapi_setting_
 _create_and_start_my_project_
 
 
