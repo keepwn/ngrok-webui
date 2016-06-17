@@ -47,4 +47,4 @@ cd my-ngrok
 
 具体原理图如下：
 
-![原理图](https://raw.githubusercontent.com/keepwn/oh-my-ngrok/master/doc/image.png)
+![原理图](https://raw.githubusercontent.com/keepwn/ngrok-webui/master/doc/image.png)
