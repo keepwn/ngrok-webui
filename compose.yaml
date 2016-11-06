@@ -1,11 +1,12 @@
 ngrok-webapi:
-  build: ./ngrok-webapi
-  dockerfile: Dockerfile-ngrok-webapi
   restart: always
+  image: keepwn/ngrok-webapi
+  ports:
+    - 5000:5000
   volumes:
-    - ./ngrok-webapi:/code
-    - ./ngrok-bin:/release
-  net: host
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ./ngrok-bin:/ngrok-bin
+    - ./ngrok-data:/ngrok-webapi/data
 
 ngrok-webui:
   restart: always
