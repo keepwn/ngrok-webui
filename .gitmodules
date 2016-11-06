@@ -1,3 +1,0 @@
-[submodule "ngrok-webapi"]
-	path = ngrok-webapi
-	url = https://github.com/keepwn/ngrok-webapi.git
