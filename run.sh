@@ -2,15 +2,15 @@
 
 NGROK_WEBUI_HOST=127.0.0.1
 NGROK_WEBUI_PORT=8080
-DOCKER_URL=tcp://127.0.0.1:2375
-DOCKER_OPTS='"--dns 8.8.8.8 --dns 8.8.4.4 -H '$DOCKER_URL' -H unix://var/run/docker.sock"'
+NGROK_DATA_DIR=$(pwd)/ngrok-data
 DOMIAN=tunnel.mydomian.com
 TUNNEL_PORT=4443
 HTTP_PORT=8080
 HTTPS_PORT=8081
+# don't change
+DOCKER_URL=unix://var/run/docker.sock
 RUNTIME_DIR=$(pwd)/ngrok-bin
-RUNTIME_DIR_IN_CONTAINER=/release
-
+RUNTIME_DIR_IN_CONTAINER=/ngrok-bin
 
 function _color_()
 {
@@ -46,32 +46,16 @@ function _check_requirement_exec_()
     type docker-compose >/dev/null 2>&1 || { echo "docker-compose isn't installed. exit." | _color_ red ; exit 1; }
 }
 
-function _check_requirement_env_setting_()
-{
-    # check docker's configuration
-    echo "->check docker's configuration"
-    isok=`sed -n "s,DOCKER_OPTS=$DOCKER_OPTS,OK,p" /etc/default/docker`
-    if [ -z "$isok" ]; then
-        echo "docker's configuration isn't set" | _color_ yellow
-        sudo sed -i "s,^#*\(DOCKER_OPTS=.*\),#\1\nDOCKER_OPTS=$DOCKER_OPTS," /etc/default/docker
-        echo "set docker's configuration successful" | _color_ green
-        sudo service docker restart 2>&1 || { echo "please manually start docker service. exit." | _color_ red ; exit 1; }
-        echo "docker's service restarted successful" | _color_ green
-    else
-        echo "docker's configuration is correct"
-    fi
-}
-
 function _check_requirement_images_()
 {
     # pull docker's images
     echo "will download images, it will take some time depending on your speed" | _color_ yellow
-    echo "->pull docker image: alpine"
-    docker pull alpine
+    echo "->pull docker image: alpine:3.4"
+    docker pull alpine:3.4
     echo "->pull docker image: keepwn/ngrok-self-hosting"
     docker pull keepwn/ngrok-self-hosting
-    echo "->pull docker image: python:3-alpine"
-    docker pull python:3-alpine
+    echo "->pull docker image: keepwn/ngrok-webapi"
+    docker pull keepwn/ngrok-webapi
     echo "->pull docker image: nginx"
     docker pull nginx
 }
@@ -79,11 +63,11 @@ function _check_requirement_images_()
 function _update_ngrokwebapi_setting_()
 {
     # update ngrok-webapi's app.conf
-    echo '->update app.conf in ngrok-webapi'
-    sed -i "s#^docker_url=.*#docker_url=$DOCKER_URL#" ngrok-webapi/app.conf
-    sed -i "s#^server_addr=.*#server_addr=$DOMIAN:$TUNNEL_PORT#" ngrok-webapi/app.conf
-    sed -i "s#^runtime_dir=.*#runtime_dir=$RUNTIME_DIR#" ngrok-webapi/app.conf
-    sed -i "s#^runtime_dir_in_container=.*#runtime_dir_in_container=$RUNTIME_DIR_IN_CONTAINER#" ngrok-webapi/app.conf
+    echo '->update app.conf in ngrok-webapi data'
+    sed -i "s#^docker_url=.*#docker_url=$DOCKER_URL#" $NGROK_DATA_DIR/app.conf
+    sed -i "s#^server_addr=.*#server_addr=$DOMIAN:$TUNNEL_PORT#" $NGROK_DATA_DIR/app.conf
+    sed -i "s#^runtime_dir=.*#runtime_dir=$RUNTIME_DIR#" $NGROK_DATA_DIR/app.conf
+    sed -i "s#^runtime_dir_in_container=.*#runtime_dir_in_container=$RUNTIME_DIR_IN_CONTAINER#" $NGROK_DATA_DIR/app.conf
 }
 
 function _create_and_start_my_project_()
@@ -91,7 +75,7 @@ function _create_and_start_my_project_()
     # create and start
     echo '->create and start project by docker-compose'
     docker-compose -f compose.yaml down
-    docker-compose -f compose.yaml up -d
+    docker-compose -f compose.yaml up --build -d
     sleep 5s
 
     echo '->check ngrok-webapi status'
@@ -156,7 +140,6 @@ function _check_ngrok_server_status_()
 # LET'S GO
 echo '0. Checking Env' | _color_ blue invert
 _check_requirement_exec_
-_check_requirement_env_setting_
 
 
 echo '1. Downloading Docker Images' | _color_ blue invert
